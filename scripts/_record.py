@@ -10,9 +10,10 @@ Architecture
 6. Stitch frames into an optimized GIF via Pillow.
 
 The demo data is deterministic — re-running this produces a similar
-GIF every time. The trial values are hand-tuned to mimic a real
-Fashion-MNIST sweep with progressive ``val_accuracy`` improvement; the
-true winner is trial 0004.
+GIF every time. The trial values are hand-tuned to look like a
+realistic training run with progressive ``val_accuracy`` improvement
+and one trial that subtly overfits in its late epochs (trial 0003).
+Trial 0002 wins on ``val_accuracy``.
 """
 
 from __future__ import annotations
@@ -43,33 +44,33 @@ VIEWPORT = {"width": 1280, "height": 1180}
 N_EPOCHS = 15
 
 HEADER = [
-    "trial_id", "epoch", "filters", "dense_units", "dropout",
+    "trial_id", "epoch", "units_1", "units_2", "dropout",
     "lr", "optimizer", "dataset",
     "loss", "val_loss", "accuracy", "val_accuracy",
 ]
 
 # 3 trials × 15 epochs, written sequentially (trial 1 epochs 1..15, then
-# trial 2, then trial 3) to mirror how KerasTuner actually emits rows.
-# Trial 0002 wins on val_accuracy; trial 0003 starts strong but its high
-# learning rate + low dropout cause val_loss to drift up in late epochs
-# (the classic overfitting signature, useful for showing what the
-# dashboard reveals at a glance).
+# trial 2, then trial 3) to mirror how KerasTuner emits rows. Trial 0002
+# wins on val_accuracy; trial 0003 starts strong but its high learning
+# rate + low dropout cause val_loss to drift up in late epochs — the
+# classic overfitting signature, useful for showing what the dashboard
+# surfaces at a glance.
 TRIALS = [
     {
-        "trial_id": "0001", "filters": 16, "dense_units": 64,
+        "trial_id": "0001", "units_1": 32, "units_2": 16,
         "dropout": 0.3, "lr": 0.01,   "optimizer": "adam",
         "train_floor": 0.42, "val_floor": 0.51, "val_drift": 0.00,
         "decay": 2.8,
     },
     {
-        "trial_id": "0002", "filters": 32, "dense_units": 128,
+        "trial_id": "0002", "units_1": 64, "units_2": 32,
         "dropout": 0.4, "lr": 0.001,  "optimizer": "adam",
         "train_floor": 0.28, "val_floor": 0.34, "val_drift": 0.00,
         "decay": 3.2,
     },
     {
-        "trial_id": "0003", "filters": 64, "dense_units": 256,
-        "dropout": 0.2, "lr": 0.01,   "optimizer": "sgd",
+        "trial_id": "0003", "units_1": 128, "units_2": 64,
+        "dropout": 0.1, "lr": 0.01,   "optimizer": "sgd",
         "train_floor": 0.30, "val_floor": 0.42, "val_drift": 0.18,
         "decay": 3.5,
     },
@@ -81,7 +82,9 @@ def _generate_rows() -> list[tuple]:
 
     Loss/val_loss follow ``floor + (start - floor) * exp(-decay * t)``
     with small Gaussian noise. Trials with ``val_drift > 0`` add a
-    linear up-drift after epoch 7 to simulate overfitting.
+    linear up-drift after epoch 7 to simulate overfitting. Values are
+    not tied to any specific dataset — they exist purely to make the
+    dashboard interesting to look at while the GIF records.
     """
     rng = np.random.default_rng(42)
     rows: list[tuple] = []
@@ -105,8 +108,8 @@ def _generate_rows() -> list[tuple]:
 
             rows.append((
                 trial["trial_id"], epoch,
-                trial["filters"], trial["dense_units"], trial["dropout"],
-                trial["lr"], trial["optimizer"], "fashion_mnist",
+                trial["units_1"], trial["units_2"], trial["dropout"],
+                trial["lr"], trial["optimizer"], "synthetic",
                 round(float(loss), 4), round(float(val_loss), 4),
                 round(float(accuracy), 4), round(float(val_accuracy), 4),
             ))
