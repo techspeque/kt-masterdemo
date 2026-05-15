@@ -1,6 +1,8 @@
-# kt-masterlogviz
+# kt-masterdemo
 
 End-to-end demo of [kt-masterlog](https://github.com/techspeque/kt-masterlog) and [kt-masterviz](https://github.com/techspeque/kt-masterviz) working together — **installed from PyPI**, not from source. This repo's whole point is to validate that the published artifacts work, and to give a try-before-you-buy walkthrough for new users.
+
+![kt-masterviz dashboard updating live as kt-masterlog writes trials](assets/demo.gif)
 
 ## What you get
 
@@ -11,8 +13,8 @@ End-to-end demo of [kt-masterlog](https://github.com/techspeque/kt-masterlog) an
 ## Quick start
 
 ```bash
-git clone https://github.com/techspeque/kt-masterlogviz.git
-cd kt-masterlogviz
+git clone https://github.com/techspeque/kt-masterdemo.git
+cd kt-masterdemo
 uv sync
 ```
 
@@ -34,7 +36,7 @@ uv run python examples/fashion_mnist_cnn.py
 uv run kt-masterviz --latest
 ```
 
-Open http://localhost:8501. The dashboard:
+Open <http://localhost:8501>. The dashboard:
 
 - Shows the trial summary sorted by `val_accuracy` (the configured objective)
 - Plots training curves per trial, switchable across `loss`, `val_loss`, `accuracy`, `val_accuracy`
@@ -94,6 +96,27 @@ The cron run is the most valuable trigger — it catches the case where a transi
 - Python 3.12
 - `uv` (auto-installs Python and deps)
 - ~30 MB to download Fashion-MNIST on first run (cached in `~/.keras/`)
+
+## Regenerating the demo GIF
+
+The GIF embedded above is committed to the repo. If the kt-masterviz UI
+changes meaningfully and the recording goes stale, regenerate it:
+
+```bash
+bash scripts/record_demo.sh
+```
+
+This script (~25 s end-to-end):
+
+1. Installs the dev group (`playwright`, `pillow`) into the venv
+2. Installs Chromium for headless capture
+3. Spawns the dashboard against a synthetic CSV
+4. Writes realistic trial rows to that CSV on a 1.2 s schedule in the background
+5. Captures 18 s of dashboard frames at 4 fps via Playwright
+6. Stitches frames into `assets/demo.gif` via Pillow
+
+Output is deterministic — same trial values every time — so diffs in
+the committed GIF reflect real UI changes rather than ML stochasticity.
 
 ## License
 

@@ -1,5 +1,5 @@
 [project]
-name = "kt-masterlogviz-demo"
+name = "kt-masterdemo"
 version = "0.0.0"
 description = "End-to-end demo of kt-masterlog + kt-masterviz, installed from PyPI. Not published."
 readme = "README.md"
@@ -16,7 +16,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = []
+# Only needed when re-recording the demo GIF via scripts/record_demo.sh.
+# Runtime usage doesn't require these.
+dev = [
+    "playwright>=1.40",
+    "pillow>=10.0",
+]
 
 # No build backend — this isn't a publishable package. uv treats it as a
 # project that just manages a venv + dependency lock.
