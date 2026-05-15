@@ -1,0 +1,39 @@
+name: pypi-smoke
+
+# Runs a 10-second end-to-end check against whatever versions of
+# kt-masterlog and kt-masterviz are currently installable from PyPI
+# under the version pins in pyproject.toml.
+#
+# Triggers:
+#   - on every push to main (catches breakage from local changes)
+#   - on every PR (validates incoming changes against PyPI artifacts)
+#   - daily on a cron (catches breakage from upstream dep upgrades,
+#     yanked releases, accidental version-range issues, etc.)
+#   - manually via the Actions UI (workflow_dispatch)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC every day
+  workflow_dispatch:
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Run smoke test
+        run: bash scripts/smoke.sh

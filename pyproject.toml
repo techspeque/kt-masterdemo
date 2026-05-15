@@ -1,0 +1,22 @@
+[project]
+name = "kt-masterlogviz-demo"
+version = "0.0.0"
+description = "End-to-end demo of kt-masterlog + kt-masterviz, installed from PyPI. Not published."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Adam" }]
+
+# These pull the actual published artifacts from PyPI — this repo's whole
+# point is to validate the released packages, so source installs are
+# deliberately not used.
+dependencies = [
+    "kt-masterlog>=0.2.0",
+    "kt-masterviz>=0.1.0",
+]
+
+[dependency-groups]
+dev = []
+
+# No build backend — this isn't a publishable package. uv treats it as a
+# project that just manages a venv + dependency lock.
